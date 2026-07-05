@@ -5,5 +5,6 @@ namespace Api.Services.Interfaces
     public interface IAuthService
     {
         Task<AuthResult> LoginAsync(LoginRequestDto dto);
+        Task<RegisterResult> RegistrarAsync(RegistrarRequestDto dto);
     }
 }

@@ -91,6 +91,7 @@ CREATE TABLE producto (
 
 CREATE TABLE estado_venta (
 	id_estado_venta CHAR(3) PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL,
 	descripcion VARCHAR(30) NOT NULL
 );
 

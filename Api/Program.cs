@@ -1,10 +1,13 @@
+using Api.Common;
 using Api.Configurations;
 using Api.Data;
+using Api.Middlewares;
 using Api.Services;
 using Api.Services.Interfaces;
 using Api.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -13,13 +16,54 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Bases de datos y herramientas de .NET
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Manejador de errores global
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PortafolioDbContext>(options =>
     options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention()
 );
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<ValidacionFilter>();
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var todosLosErrores = context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            string mensajeDetalle = "Error de validación en la petición.";
+
+            bool esErrorDeJson = todosLosErrores.Any(e =>
+                e.Contains("could not be converted") ||
+                e.Contains("JSON value") ||
+                e.Contains("deserialized"));
+
+            if (esErrorDeJson)
+            {
+                mensajeDetalle = "Uno o más campos tienen un tipo de dato incorrecto (ej. un número donde se esperaba texto).";
+            }
+            else if (todosLosErrores.Any(e => e.Contains("is required")))
+            {
+                mensajeDetalle = "Faltan campos obligatorios en la petición o el cuerpo está vacío.";
+            }
+            else if (todosLosErrores.Count > 0)
+            {
+                mensajeDetalle = todosLosErrores[0];
+            }
+
+            var respuestaPersonalizada = ApiResponse<object>.Fail(mensajeDetalle);
+
+            return new BadRequestObjectResult(respuestaPersonalizada);
+        };
+    });
+
 builder.Services.AddHttpContextAccessor(); // Clave para la auditoría posterior
 builder.Services.AddOpenApi();
 
@@ -69,6 +113,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference(); // Levanta la UI interactiva en /scalar/v1
 }
+
+app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
 

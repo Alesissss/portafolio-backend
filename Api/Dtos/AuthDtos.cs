@@ -6,7 +6,7 @@ public enum AuthResultType
     Ok,
     CredencialesInvalidas,
     UsuarioInactivo,
-    RolNoEncontrado
+    RolNoEncontrado,
 };
 
 // El record simple que lleva consigo el estado de la respuesta y la data si es que tuviera
@@ -24,6 +24,7 @@ public record UsuarioDto(
     bool Estado
     );
 
+// Login
 public record LoginRequestDto(
     string Username, 
     string Password
@@ -34,3 +35,24 @@ public record LoginResponseDto(
     DateTime Expiration,
     UsuarioDto Usuario
     );
+
+// Registrar
+public enum RegisterResultType
+{
+    Ok,
+    UsuarioExistente,
+}
+
+public record RegisterResult(RegisterResultType Estado);
+
+public record RegistrarRequestDto(
+    string ApellidoPaterno,
+    string ApellidoMaterno,
+    string Nombres,
+    string Correo,
+    string Username,
+    string Password,
+    string ConfirmPassword,
+    Guid IdRol
+    );
+

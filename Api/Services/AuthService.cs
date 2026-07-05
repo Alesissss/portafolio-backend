@@ -1,5 +1,6 @@
 ﻿using Api.Data;
 using Api.Dtos;
+using Api.Models;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +16,10 @@ namespace Api.Services
             _jwtTokenService = jwtTokenService;
         }
 
+        // Login
         public async Task<AuthResult> LoginAsync(LoginRequestDto dto)
         {
-            var usuario = await _context.Usuario
+            var usuario = await _context.Usuarios
                 .Include(u => u.Rol)
                 .FirstOrDefaultAsync(u => u.Username == dto.Username);
 
@@ -49,6 +51,32 @@ namespace Api.Services
             );
 
             return new AuthResult(AuthResultType.Ok, loginResponse);
+        }
+
+        // Registrar
+        public async Task<RegisterResult> RegistrarAsync(RegistrarRequestDto dto)
+        {
+            // Verificar si el usuario ya existe (Username es UNIQUE)
+            var usuarioExistente = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Username == dto.Username);
+
+            if (usuarioExistente != null) return new RegisterResult(RegisterResultType.UsuarioExistente);
+            
+            // Crear nuevo usuario
+            var nuevoUsuario = new Usuario
+            {
+                Username = dto.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                Correo = dto.Correo,
+                Nombres = dto.Nombres,
+                ApellidoPaterno = dto.ApellidoPaterno,
+                ApellidoMaterno = dto.ApellidoMaterno,
+                IdRol = dto.IdRol,
+                Estado = true // Estado siempre es activo por defecto al registrar
+            };
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
+            return new RegisterResult(RegisterResultType.Ok);
         }
     }
 }
