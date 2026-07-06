@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,7 +94,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // 3. Servicios: Contratos (Interfaces), Implementaciones y Validadores
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 
 // Obliga a .NET a convertir todas las URL en minúscula
 builder.Services.AddRouting(options =>
@@ -111,7 +112,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(); // Levanta la UI interactiva en /scalar/v1
+    app.MapScalarApiReference(options => // Levanta la UI interactiva en /scalar/v1
+    {
+        options.WithTitle("Portafolio Backend - API 1.0.0");
+        options.WithTheme(ScalarTheme.DeepSpace);
+    }); 
 }
 
 app.UseExceptionHandler(_ => { });
@@ -123,5 +128,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Endpoint raíz: estado del API (excluido de la documentación OpenAPI).
+var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+app.MapGet("/", () => Results.Ok(new
+{
+    nombre = "Portafolio Backend API",
+    estado = "OK",
+    version,
+    entorno = app.Environment.EnvironmentName,
+    timestampUtc = DateTime.UtcNow,
+    documentacion = app.Environment.IsDevelopment()
+        ? new { scalar = "/scalar/v1", openapi = "/openapi/v1.json" }
+        : null
+})).ExcludeFromDescription();
 
 app.Run();

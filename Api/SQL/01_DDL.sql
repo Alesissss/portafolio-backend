@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 DROP TABLE IF EXISTS detalle_venta;
 DROP TABLE IF EXISTS venta;
 DROP TABLE IF EXISTS estado_venta;
@@ -22,13 +24,18 @@ CREATE TABLE permiso (
 
 CREATE TABLE rol (
 	id_rol UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	nombre VARCHAR(30) NOT NULL UNIQUE,
+	nombre VARCHAR(30) NOT NULL,
 	estado BOOLEAN NOT NULL DEFAULT TRUE, -- dar de baja
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
     usuario_registro UUID            NULL,
     fecha_registro   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Índice parcial para el nombre del rol (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres de rol activos)
+CREATE UNIQUE INDEX idx_rol_nombre_unico_activo 
+ON rol (nombre) 
+WHERE (estado_registro = TRUE);
 
 CREATE TABLE permiso_rol(
 	id_permiso CHAR(15) NOT NULL,
@@ -51,7 +58,7 @@ CREATE TABLE usuario (
 	apellido_materno VARCHAR(30) NOT NULL,
 	nombres VARCHAR (30) NOT NULL,
 	correo VARCHAR (255) NOT NULL,
-	username VARCHAR (255) NOT NULL UNIQUE,
+	username VARCHAR (255) NOT NULL,
 	password_hash VARCHAR(255) NOT NULL,
 	estado BOOLEAN NOT NULL DEFAULT TRUE, -- para dar de baja
 	-- campos de auditoría
@@ -62,6 +69,11 @@ CREATE TABLE usuario (
 	-- constraints
 	CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
 );
+
+-- Índice parcial para el username (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los usernames activos)
+CREATE UNIQUE INDEX idx_usuario_username_unico_activo 
+ON usuario (username) 
+WHERE (estado_registro = TRUE);
 
 CREATE TABLE categoria (
 	id_categoria CHAR(3) PRIMARY KEY,
@@ -74,8 +86,14 @@ CREATE TABLE categoria (
     fecha_registro   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Índice parcial para el nombre (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres activos)
+CREATE UNIQUE INDEX idx_categoria_nombre_unico_activo 
+ON categoria (nombre) 
+WHERE (estado_registro = TRUE);
+
 CREATE TABLE producto (
 	id_producto SERIAL PRIMARY KEY,
+	nombre VARCHAR(50) NOT NULL,
 	descripcion VARCHAR(50) NOT NULL,
 	stock NUMERIC(19,2) NOT NULL,
 	precio NUMERIC(19,2) NOT NULL,
@@ -88,6 +106,11 @@ CREATE TABLE producto (
 	-- constraints
 	CONSTRAINT fk_producto_categoria FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
 );
+
+-- Índice parcial para el nombre (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres activos)
+CREATE UNIQUE INDEX idx_producto_nombre_unico_activo 
+ON producto (nombre) 
+WHERE (estado_registro = TRUE);
 
 CREATE TABLE estado_venta (
 	id_estado_venta CHAR(3) PRIMARY KEY,

@@ -1,6 +1,8 @@
-﻿using Api.Models;
+﻿using Api.Common;
+using Api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq.Expressions;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
@@ -63,7 +65,7 @@ namespace Api.Data
                 b.Property(u => u.Correo).IsRequired().HasMaxLength(255);
                 b.Property(u => u.Username).IsRequired().HasMaxLength(255);
                 b.Property(u => u.PasswordHash).IsRequired().HasMaxLength(255);
-                b.HasIndex(u => u.Username).IsUnique();
+                b.HasIndex(u => u.Username).IsUnique().HasFilter("estado_registro = true"); ;
 
                 b.HasOne(u => u.Rol)
                  .WithMany()
@@ -156,6 +158,22 @@ namespace Api.Data
                 b.Property(al => al.RegistroAnterior).HasColumnType("jsonb");
                 b.Property(al => al.RegistroNuevo).HasColumnType("jsonb");
             });
+
+            // Aplicar el query filter global para soft delete en todas las entidades que tengan la propiedad EstadoRegistro
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Verificar si la entidad tiene herencia de RegistroBase
+                if (typeof(RegistroBase).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+                    var property = Expression.Property(parameter, nameof(RegistroBase.EstadoRegistro));
+                    var condition = Expression.Equal(property, Expression.Constant(true));
+                    var lambda = Expression.Lambda(condition, parameter);
+
+                    // Filtro global para soft delete
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
