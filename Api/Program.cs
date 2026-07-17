@@ -26,6 +26,7 @@ builder.Services.AddDbContext<PortafolioDbContext>(options =>
            .UseSnakeCaseNamingConvention()
 );
 
+builder.Services.AddCustomCors(builder.Configuration);
 builder.Services.AddControllers(options =>
     {
         options.Filters.Add<ValidacionFilter>();
@@ -123,7 +124,8 @@ app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
 
-// Orden de los middlewares de autenticación y autorización
+// Orden de los middlewares de CORS, autenticación y autorización
+app.UseCustomCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
