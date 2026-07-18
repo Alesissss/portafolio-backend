@@ -123,6 +123,9 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IComboService, ComboService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 // Obliga a .NET a convertir todas las URL en minúscula
 builder.Services.AddRouting(options =>

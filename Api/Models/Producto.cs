@@ -6,6 +6,7 @@ namespace Api.Models
     {
         public int IdProducto { get; set; }
         public string IdCategoria { get; set; } = null!;
+        public string Nombre { get; set; } = null!;
         public string Descripcion { get; set; } = null!;
         public decimal Stock { get; set; }
         public decimal Precio { get; set; }

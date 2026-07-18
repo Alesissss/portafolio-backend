@@ -125,7 +125,6 @@ CREATE TABLE venta (
 	igv NUMERIC(19,2) NOT NULL,
 	total NUMERIC(19,2) NOT NULL,
 	id_vendedor UUID NOT NULL, 
-	id_cliente UUID NOT NULL,
 	id_estado_venta CHAR(3) NOT NULL, --BO (BORRADOR) --GEN (GENERADA) --PAG(PAGADA) --AN(ANULADA)
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
@@ -133,7 +132,6 @@ CREATE TABLE venta (
     fecha_registro   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- constraints
 	CONSTRAINT fk_usuario_vendedor FOREIGN KEY (id_vendedor) REFERENCES usuario(id_usuario),
-	CONSTRAINT fk_usuario_cliente FOREIGN KEY (id_cliente) REFERENCES usuario(id_usuario),
 	CONSTRAINT fk_estado_venta FOREIGN KEY (id_estado_venta) REFERENCES estado_venta(id_estado_venta)
 );
 

@@ -1,10 +1,9 @@
-﻿using Api.Dtos;
+using Api.Dtos;
 
 namespace Api.Services.Interfaces
 {
     public interface IAuthService
     {
         Task<AuthResult> LoginAsync(LoginRequestDto dto);
-        Task<RegisterResult> RegistrarAsync(RegistrarRequestDto dto);
     }
 }

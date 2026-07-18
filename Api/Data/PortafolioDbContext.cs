@@ -120,11 +120,6 @@ namespace Api.Data
                  .WithMany()
                  .HasForeignKey(v => v.IdVendedor)
                  .OnDelete(DeleteBehavior.Restrict);
-
-                b.HasOne(v => v.Cliente)
-                 .WithMany()
-                 .HasForeignKey(v => v.IdCliente)
-                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<DetalleVenta>(b =>
