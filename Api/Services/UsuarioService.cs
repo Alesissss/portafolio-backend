@@ -123,7 +123,7 @@ namespace Api.Services
             return UsuarioResultType.Ok;
         }
 
-        private UsuarioDto UsuarioToDto(Usuario u) =>
+        private static UsuarioDto UsuarioToDto(Usuario u) =>
             new UsuarioDto(
                 IdUsuario: u.IdUsuario,
                 IdRol: u.IdRol,

@@ -126,6 +126,7 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IComboService, ComboService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IVentaService, VentaService>();
 
 // Obliga a .NET a convertir todas las URL en minúscula
 builder.Services.AddRouting(options =>

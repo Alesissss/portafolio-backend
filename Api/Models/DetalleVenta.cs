@@ -1,6 +1,8 @@
-﻿namespace Api.Models
+﻿using Api.Common;
+
+namespace Api.Models
 {
-    public class DetalleVenta
+    public class DetalleVenta : RegistroBase
     {
         public Guid IdVenta { get; set; }
         public int IdProducto { get; set; }

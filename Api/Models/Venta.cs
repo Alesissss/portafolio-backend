@@ -13,5 +13,6 @@ namespace Api.Models
         public string IdEstadoVenta { get; set; } = null!;
         public EstadoVenta EstadoVenta { get; set; } = null!;
         public Usuario Vendedor { get; set; } = null!;
+        public List<DetalleVenta> Detalles { get; set; } = new();
     }
 }

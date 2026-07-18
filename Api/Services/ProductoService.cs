@@ -115,7 +115,7 @@ namespace Api.Services
             return ProductoResultType.Ok;
         }
 
-        private ProductoDto ProductoToDto(Producto p) =>
+        private static ProductoDto ProductoToDto(Producto p) =>
             new ProductoDto(
                 IdProducto: p.IdProducto,
                 Nombre: p.Nombre,

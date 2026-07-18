@@ -85,6 +85,7 @@ namespace Api.Data
             {
                 b.ToTable("producto");
                 b.HasKey(p => p.IdProducto);
+                b.Property(p => p.Nombre).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Descripcion).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Stock).HasPrecision(19, 2);
                 b.Property(p => p.Precio).HasPrecision(19, 2);
@@ -131,7 +132,7 @@ namespace Api.Data
                 b.Property(dv => dv.Observacion).HasMaxLength(255);
 
                 b.HasOne(dv => dv.Venta)
-                 .WithMany()
+                 .WithMany(v => v.Detalles)
                  .HasForeignKey(dv => dv.IdVenta);
 
                 b.HasOne(dv => dv.Producto)
