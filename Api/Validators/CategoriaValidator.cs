@@ -11,7 +11,7 @@ public class CategoriaValidator : AbstractValidator<RegistrarRequestCategoriaDto
             .MaximumLength(3).WithMessage("El ID de la categoría no puede exceder los 3 caracteres.");
         RuleFor(x => x.Nombre)
             .NotEmpty().WithMessage("El nombre de la categoría es obligatorio.")
-            .MaximumLength(30).WithMessage("El nombre de la categoría no puede exceder los 100 caracteres.");
+            .MaximumLength(30).WithMessage("El nombre de la categoría no puede exceder los 30 caracteres.");
         RuleFor(x => x.Descripcion)
             .MaximumLength(255).WithMessage("La descripción de la categoría no puede exceder los 255 caracteres.");
     }
@@ -26,7 +26,7 @@ public class EditarCategoriaValidator : AbstractValidator<CategoriaDto>
             .MaximumLength(3).WithMessage("El ID de la categoría no puede exceder los 3 caracteres.");
         RuleFor(x => x.Nombre)
             .NotEmpty().WithMessage("El nombre de la categoría es obligatorio.")
-            .MaximumLength(30).WithMessage("El nombre de la categoría no puede exceder los 100 caracteres.");
+            .MaximumLength(30).WithMessage("El nombre de la categoría no puede exceder los 30 caracteres.");
         RuleFor(x => x.Descripcion)
             .MaximumLength(255).WithMessage("La descripción de la categoría no puede exceder los 255 caracteres.");
     }
