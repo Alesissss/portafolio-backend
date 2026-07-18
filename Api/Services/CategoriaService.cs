@@ -21,7 +21,7 @@ namespace Api.Services
 
         public async Task<CategoriaResult> ObtenerUnaCategoriaAsync(string id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.IdCategoria == id);
 
             if (categoria == null) return new CategoriaResult(CategoriaResultType.NoExiste);
 
@@ -43,6 +43,7 @@ namespace Api.Services
                 IdCategoria = dto.IdCategoria,
                 Nombre = dto.Nombre,
                 Descripcion = dto.Descripcion,
+                Estado = dto.Estado,
             };
 
             // Guardar cambios
@@ -54,7 +55,7 @@ namespace Api.Services
 
         public async Task<CategoriaResultType> EditarCategoriaAsync(CategoriaDto dto)
         {
-            var categoria = await _context.Categorias.FindAsync(dto.IdCategoria);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.IdCategoria == dto.IdCategoria);
 
             // Validar que la categoría exista
             if (categoria == null) return CategoriaResultType.NoExiste;
@@ -76,7 +77,7 @@ namespace Api.Services
 
         public async Task<CategoriaResultType> DarBajaCategoriaAsync(string id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.IdCategoria == id);
 
             // Validar que la categoría exista
             if (categoria == null) return CategoriaResultType.NoExiste;
@@ -95,7 +96,7 @@ namespace Api.Services
 
         public async Task<CategoriaResultType> EliminarCategoriaAsync(string id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.IdCategoria == id);
 
             // Validar que la categoría exista
             if (categoria == null) return CategoriaResultType.NoExiste;

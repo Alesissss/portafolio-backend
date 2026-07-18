@@ -1,5 +1,7 @@
 ﻿using Api.Dtos;
+using Api.Models;
 using FluentValidation;
+using System.Text;
 namespace Api.Validators;
 
 public class LoginRequestValidator : AbstractValidator<LoginRequestDto>
@@ -45,7 +47,8 @@ public class RegistroRequestValidator : AbstractValidator<RegistrarRequestDto>
             .Equal(x => x.Password).WithMessage("Las contraseñas no coinciden.");
 
         RuleFor(x => x.Username)
-            .NotEmpty().WithMessage("El nombre de usuario es obligatorio.");
+            .NotEmpty().WithMessage("El nombre de usuario es obligatorio.")
+            .MaximumLength(255).WithMessage("El nombre de usuario no puede exceder los 255 caracteres.");
 
     }
 

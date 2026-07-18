@@ -7,7 +7,9 @@ using Api.Services.Interfaces;
 using Api.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -26,6 +28,7 @@ builder.Services.AddDbContext<PortafolioDbContext>(options =>
            .UseSnakeCaseNamingConvention()
 );
 
+builder.Services.AddCustomCors(builder.Configuration);
 builder.Services.AddControllers(options =>
     {
         options.Filters.Add<ValidacionFilter>();
@@ -91,6 +94,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            ApiResponse<object>.Fail("Demasiados intentos. Vuelve a intentarlo en unos momentos."),
+            cancellationToken);
+    };
+});
+
 // 3. Servicios: Contratos (Interfaces), Implementaciones y Validadores
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -111,19 +139,21 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
     app.MapScalarApiReference(options => // Levanta la UI interactiva en /scalar/v1
     {
         options.WithTitle("Portafolio Backend - API 1.0.0");
         options.WithTheme(ScalarTheme.DeepSpace);
-    }); 
+    }).AllowAnonymous();
 }
 
 app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
 
-// Orden de los middlewares de autenticación y autorización
+// Orden de los middlewares de CORS, autenticación y autorización
+app.UseCustomCors();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -141,6 +171,6 @@ app.MapGet("/", () => Results.Ok(new
     documentacion = app.Environment.IsDevelopment()
         ? new { scalar = "/scalar/v1", openapi = "/openapi/v1.json" }
         : null
-})).ExcludeFromDescription();
+})).ExcludeFromDescription().AllowAnonymous();
 
 app.Run();
