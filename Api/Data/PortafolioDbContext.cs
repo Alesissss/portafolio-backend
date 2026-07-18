@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace Api.Data
 {
@@ -202,18 +201,35 @@ namespace Api.Data
                 pendientes.Add((e, log, e.State == EntityState.Deleted));
             }
 
+            // Sin cambios de negocio que auditar: guardado normal, no hace falta transacción extra.
+            if (pendientes.Count == 0)
+                return await base.SaveChangesAsync(cancellationToken);
+
+            if (Database.CurrentTransaction is not null)
+                return await GuardarConAuditoriaAsync(pendientes, cancellationToken);
+
+            await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+            var resultado = await GuardarConAuditoriaAsync(pendientes, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);   // si algo falla antes, el Dispose hace rollback
+            return resultado;
+        }
+
+        // Ejecuta los dos guardados: primero el negocio (para obtener PKs generadas y valores finales),
+        // luego los logs de auditoría con esos datos ya disponibles.
+        private async Task<int> GuardarConAuditoriaAsync(
+            List<(EntityEntry Entry, AuditoriaLog Log, bool EsDelete)> pendientes,
+            CancellationToken cancellationToken)
+        {
             var resultado = await base.SaveChangesAsync(cancellationToken);
 
-            if (pendientes.Count > 0)
+            foreach (var (entry, log, esDelete) in pendientes)
             {
-                foreach (var (entry, log, esDelete) in pendientes)
-                {
-                    log.IdRegistro = PkComoTexto(entry);
-                    log.RegistroNuevo = esDelete ? null : Serializar(entry.CurrentValues);
-                }
-                AuditoriaLogs.AddRange(pendientes.Select(p => p.Log));
-                await base.SaveChangesAsync(cancellationToken);   // no se vuelve a auditar (entidad = AuditoriaLog)
+                log.IdRegistro = PkComoTexto(entry);
+                log.RegistroNuevo = esDelete ? null : Serializar(entry.CurrentValues);
             }
+            AuditoriaLogs.AddRange(pendientes.Select(p => p.Log));
+            await base.SaveChangesAsync(cancellationToken);   // no se vuelve a auditar (entidad = AuditoriaLog)
+
             return resultado;
         }
 

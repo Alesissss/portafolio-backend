@@ -25,7 +25,10 @@ namespace Api.Services
 
             // Usuario no encontrado (no se deberían dar detalles de si el usuario existe o no)
             if (usuario == null) return new AuthResult(AuthResultType.CredencialesInvalidas);
-            
+
+            // Rol no encontrado o inactivo
+            if (usuario.Rol == null || !usuario.Rol.Estado) return new AuthResult(AuthResultType.RolNoEncontrado);
+
             // Usuario inactivo
             if (!usuario.Estado) return new AuthResult(AuthResultType.UsuarioInactivo);
 
