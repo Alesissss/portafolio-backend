@@ -99,6 +99,7 @@ CREATE TABLE producto (
 	precio NUMERIC(19,2) NOT NULL,
 	estado BOOLEAN DEFAULT TRUE, -- para dar de baja
 	id_categoria CHAR(3) NOT NULL,
+	archivo_foto VARCHAR(255) NULL,
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
     usuario_registro UUID            NULL,
@@ -115,7 +116,7 @@ WHERE (estado_registro = TRUE);
 CREATE TABLE estado_venta (
 	id_estado_venta CHAR(3) PRIMARY KEY,
 	nombre VARCHAR(30) NOT NULL,
-	descripcion VARCHAR(30) NOT NULL
+	descripcion VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE venta (
@@ -126,6 +127,7 @@ CREATE TABLE venta (
 	total NUMERIC(19,2) NOT NULL,
 	id_vendedor UUID NOT NULL, 
 	id_estado_venta CHAR(3) NOT NULL, --BO (BORRADOR) --GEN (GENERADA) --PAG(PAGADA) --AN(ANULADA)
+	archivo_pago VARCHAR(255) NULL,
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
     usuario_registro UUID            NULL,

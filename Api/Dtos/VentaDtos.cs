@@ -3,6 +3,14 @@ namespace Api.Dtos;
 public enum VentaResultType
 {
     Ok,
+    NoEncontrada,
+    ProductoNoExiste,   // un detalle apunta a un producto inexistente
+    NoEditable,         // se intentó editar una venta que no está en BO
+    EstadoInvalido,     // transición desde un estado que no corresponde
+    StockInsuficiente,  // al generar, algún producto no alcanza
+    ArchivoRequerido,   // al pagar, falta el comprobante
+    NoAutorizado,       // acción restringida (ej. anular sin ser admin)
+    ErrorRegistro,
 };
 
 public record VentaResult(
@@ -44,6 +52,22 @@ public record RegistrarRequestVentaDto(
 );
 
 public record RegistrarDetalleVentaDto(
+    int IdProducto,
+    decimal Cantidad,
+    string? Observacion
+);
+
+// ---- Escritura: editar venta (solo en estado Borrador) ----
+// DTO propio para tener control total: el cliente solo manda la venta y su lista
+// de detalles deseada; el servidor reconcilia contra lo que hay en BD (alta/baja/modif).
+// Precio y totales los recalcula el servidor, igual que en el registro.
+
+public record EditarRequestVentaDto(
+    Guid IdVenta,
+    List<EditarDetalleVentaDto> Detalles
+);
+
+public record EditarDetalleVentaDto(
     int IdProducto,
     decimal Cantidad,
     string? Observacion

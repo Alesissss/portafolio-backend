@@ -89,6 +89,7 @@ namespace Api.Data
                 b.Property(p => p.Descripcion).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Stock).HasPrecision(19, 2);
                 b.Property(p => p.Precio).HasPrecision(19, 2);
+                b.Property(p => p.ArchivoFoto).HasMaxLength(255);
 
                 b.HasOne(p => p.Categoria)
                  .WithMany()
@@ -112,6 +113,7 @@ namespace Api.Data
                 b.Property(v => v.Subtotal).HasPrecision(19, 2);
                 b.Property(v => v.Igv).HasPrecision(19, 2);
                 b.Property(v => v.Total).HasPrecision(19, 2);
+                b.Property(p => p.ArchivoPago).HasMaxLength(255);
 
                 b.HasOne(v => v.EstadoVenta)
                  .WithMany()
@@ -154,14 +156,14 @@ namespace Api.Data
                 b.Property(al => al.RegistroNuevo).HasColumnType("jsonb");
             });
 
-            // Aplicar el query filter global para soft delete en todas las entidades que tengan la propiedad EstadoRegistro
+            // Aplicar el query filter global para soft delete solo a las entidades que implementan ISoftDelete
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                // Verificar si la entidad tiene herencia de RegistroBase
-                if (typeof(RegistroBase).IsAssignableFrom(entityType.ClrType))
+                // Verificar si la entidad participa del borrado lógico
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
                 {
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
-                    var property = Expression.Property(parameter, nameof(RegistroBase.EstadoRegistro));
+                    var property = Expression.Property(parameter, nameof(ISoftDelete.EstadoRegistro));
                     var condition = Expression.Equal(property, Expression.Constant(true));
                     var lambda = Expression.Lambda(condition, parameter);
 
