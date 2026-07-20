@@ -2,7 +2,7 @@
 
 namespace Api.Models
 {
-    public class Venta : RegistroBase
+    public class Venta : RegistroConEstado
     {
         public Guid IdVenta { get; set; }
         public DateTimeOffset FechaEmision {  get; set; } = DateTimeOffset.UtcNow;
@@ -10,10 +10,10 @@ namespace Api.Models
         public decimal Igv { get; set; }
         public decimal Total { get; set; }
         public Guid IdVendedor { get; set; }
-        public Guid IdCliente { get; set; }
         public string IdEstadoVenta { get; set; } = null!;
+        public string? ArchivoPago { get; set; }
         public EstadoVenta EstadoVenta { get; set; } = null!;
         public Usuario Vendedor { get; set; } = null!;
-        public Usuario Cliente {  get; set; } = null!;
+        public List<DetalleVenta> Detalles { get; set; } = new();
     }
 }

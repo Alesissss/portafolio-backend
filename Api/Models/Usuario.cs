@@ -2,7 +2,7 @@
 
 namespace Api.Models
 {
-    public class Usuario : RegistroBase
+    public class Usuario : RegistroConEstado
     {
         public Guid IdUsuario {  get; set; }
         public Guid IdRol { get; set; }

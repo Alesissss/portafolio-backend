@@ -2,7 +2,7 @@
 
 namespace Api.Models
 {
-    public class PermisoRol : RegistroBase
+    public class PermisoRol : RegistroConEstado
     {
         public string IdPermiso { get; set; } = null!;
         public Guid IdRol { get; set; }

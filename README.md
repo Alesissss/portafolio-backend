@@ -1,6 +1,6 @@
 # 🗄️ Portafolio Backend — API REST (.NET 10 + PostgreSQL)
 
-API REST de un **ERP de ventas e inventario** construida con **.NET 10** y **PostgreSQL**, con autenticación **JWT**, control de acceso por roles y permisos (**RBAC**), auditoría de cambios y despliegue en **Docker**.
+API REST de un **sistema de gestión de ventas** (un sistema transaccional / TPS) construida con **.NET 10** y **PostgreSQL**, con autenticación **JWT**, control de acceso por roles y permisos (**RBAC**), auditoría de cambios y despliegue en **Docker**.
 
 Este proyecto forma parte de mi portafolio y acompaña al cliente [portafolio-frontend](https://github.com/Alesissss/portafolio-frontend) (React + TypeScript).
 
@@ -71,7 +71,7 @@ erDiagram
     ROL ||--o{ PERMISO_ROL : asigna
     PERMISO ||--o{ PERMISO_ROL : incluye
     CATEGORIA ||--o{ PRODUCTO : agrupa
-    USUARIO ||--o{ VENTA : "vende / compra"
+    USUARIO ||--o{ VENTA : vende
     ESTADO_VENTA ||--o{ VENTA : clasifica
     VENTA ||--o{ DETALLE_VENTA : contiene
     PRODUCTO ||--o{ DETALLE_VENTA : figura_en

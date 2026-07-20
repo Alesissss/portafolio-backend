@@ -10,7 +10,7 @@ VALUES ('Administrador', TRUE);
 INSERT INTO rol (nombre, estado) 
 VALUES ('Vendedor', TRUE);
 
-
+-- Usuario superadmin
 INSERT INTO usuario (
     id_rol, apellido_paterno, apellido_materno, nombres, correo, username, password_hash, estado, estado_registro
 ) 
@@ -22,3 +22,10 @@ SELECT
 WHERE NOT EXISTS (
     SELECT 1 FROM usuario WHERE username = 'atorres' AND estado_registro = TRUE
 );
+
+-- Estados de venta (configuración)
+INSERT INTO estado_venta (id_estado_venta, nombre, descripcion) VALUES
+('BO', 'BORRADOR', 'Puede eliminarse y editarse.'),
+('GEN', 'GENERADA', 'Solo puede ser anulada.'),
+('PAG', 'PAGADA', 'Estado irreversible.'),
+('AN', 'ANULADA', 'Estado irreversible');
