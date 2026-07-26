@@ -27,7 +27,7 @@ namespace Api.Data
             {
                 b.ToTable("permisos");
                 b.HasKey(p => p.IdPermiso);
-                b.Property(p => p.IdPermiso).HasMaxLength(15);
+                b.Property(p => p.IdPermiso).HasMaxLength(30);
                 b.Property(p => p.Nombre).IsRequired().HasMaxLength(30);
                 b.Property(p => p.Descripcion).HasMaxLength(255);
             });
@@ -44,6 +44,7 @@ namespace Api.Data
             {
                 b.ToTable("permiso_rol");
                 b.HasKey(pr => new { pr.IdPermiso, pr.IdRol });
+                b.Property(pr => pr.IdPermiso).HasMaxLength(30);
 
                 b.HasOne<Permiso>()
                  .WithMany()

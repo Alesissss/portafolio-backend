@@ -8,5 +8,7 @@ namespace Api.Services.Interfaces
     {
         public Task<List<ComboDto>> GetCategoriasComboAsync();
         public Task<List<ComboDto>> GetRolesComboAsync();
+        public Task<List<ProductoComboDto>> GetProductosComboAsync();
+        public Task<List<ComboDto>> GetVendedoresComboAsync();
     }
 }

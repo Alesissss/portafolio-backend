@@ -50,9 +50,11 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<object>>> RegistrarProducto([FromBody] RegistrarRequestProductoDto dto)
+        // multipart/form-data en vez de JSON: es el único content type que puede llevar un
+        // archivo junto a los campos. `foto` es opcional; si no viene, el producto no lleva imagen.
+        public async Task<ActionResult<ApiResponse<object>>> RegistrarProducto([FromForm] RegistrarRequestProductoDto dto, IFormFile? foto)
         {
-            var result = await _productoService.RegistrarProductoAsync(dto);
+            var result = await _productoService.RegistrarProductoAsync(dto, foto);
             return result switch
             {
                 ProductoResultType.Ok =>
@@ -69,9 +71,10 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<object>>> EditarProducto([FromBody] ProductoDto dto)
+        // Sin `foto` en el form, la imagen actual se conserva.
+        public async Task<ActionResult<ApiResponse<object>>> EditarProducto([FromForm] ProductoDto dto, IFormFile? foto)
         {
-            var result = await _productoService.EditarProductoAsync(dto);
+            var result = await _productoService.EditarProductoAsync(dto, foto);
             return result switch
             {
                 ProductoResultType.Ok =>

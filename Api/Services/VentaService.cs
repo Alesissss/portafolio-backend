@@ -98,6 +98,9 @@ namespace Api.Services
             if (venta is null) return VentaResultType.NoEncontrada;
             if (venta.IdEstadoVenta != "BO") return VentaResultType.NoEditable;   // solo borradores
 
+            // Actualizar vendedor
+            venta.IdVendedor = dto.IdVendedor;
+
             var ids = dto.Detalles.Select(d => d.IdProducto).Distinct().ToList();
             var productos = await _context.Productos
                 .Where(p => ids.Contains(p.IdProducto))
@@ -235,6 +238,34 @@ namespace Api.Services
             venta.IdEstadoVenta = "AN";
             await _context.SaveChangesAsync();
             return VentaResultType.Ok;
+        }
+
+        // Devuelve el comprobante de pago para que el controller lo sirva.
+        // Es PRIVADO a propósito: vive fuera de wwwroot, así que la única puerta de entrada
+        // es el endpoint con [Authorize]; no hay URL adivinable que lo exponga.
+        public async Task<ComprobanteResult> ObtenerComprobanteAsync(Guid id)
+        {
+            var venta = await _context.Ventas
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.IdVenta == id);
+
+            if (venta is null) return new ComprobanteResult(VentaResultType.NoEncontrada);
+            if (string.IsNullOrWhiteSpace(venta.ArchivoPago))
+                return new ComprobanteResult(VentaResultType.ArchivoRequerido);
+
+            var archivo = _fileService.AbrirPrivado(venta.ArchivoPago);
+            // La fila apunta a un archivo que ya no está en disco.
+            if (archivo is null) return new ComprobanteResult(VentaResultType.NoEncontrada);
+
+            // Nombre amigable para la descarga; el del disco es un Guid sin significado.
+            var extension = Path.GetExtension(venta.ArchivoPago);
+            var nombreDescarga = $"comprobante-{venta.IdVenta}{extension}";
+
+            return new ComprobanteResult(
+                VentaResultType.Ok,
+                archivo.Value.Contenido,
+                archivo.Value.TipoContenido,
+                nombreDescarga);
         }
 
         private static VentaDto VentaToDto(Venta v) =>

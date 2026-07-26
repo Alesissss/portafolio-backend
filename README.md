@@ -1,6 +1,6 @@
 # 🗄️ Portafolio Backend — API REST (.NET 10 + PostgreSQL)
 
-API REST de un **sistema de gestión de ventas** (un sistema transaccional / TPS) construida con **.NET 10** y **PostgreSQL**, con autenticación **JWT**, control de acceso por roles y permisos (**RBAC**), auditoría de cambios y despliegue en **Docker**.
+API REST de un **sistema de gestión de ventas** (un sistema transaccional / TPS) construida con **.NET 10** y **PostgreSQL**, con autenticación **JWT**, auditoría de cambios, soft-delete y despliegue en **Docker**.
 
 Este proyecto forma parte de mi portafolio y acompaña al cliente [portafolio-frontend](https://github.com/Alesissss/portafolio-frontend) (React + TypeScript).
 
@@ -15,7 +15,7 @@ Este proyecto forma parte de mi portafolio y acompaña al cliente [portafolio-fr
 ## ✨ Características
 
 - **Autenticación JWT** con expiración configurable y `ClockSkew = 0`.
-- **RBAC**: usuarios → roles → permisos (tablas `permiso`, `rol`, `permiso_rol`).
+- **Modelo de roles y permisos**: usuarios → roles → permisos (tablas `permiso`, `rol`, `permiso_rol`). Hoy los endpoints se protegen con `[Authorize]` (token válido); la autorización **por permiso** con policies está en el roadmap.
 - **Auditoría** (`auditoria_log`): registra INSERT/UPDATE/DELETE con estado anterior y nuevo en **JSONB**, más el usuario del JWT y el de la BD.
 - **Soft-delete** transversal: todas las tablas de negocio llevan campos de auditoría (`estado_registro`, `usuario_registro`, `fecha_registro`) y una baja lógica de negocio (`estado`).
 - **Respuesta uniforme** `ApiResponse<T>` (`{ status, message, data }`) para que el frontend consuma siempre la misma forma.
@@ -154,8 +154,11 @@ Las funcionalidades y correcciones se trabajan en ramas `feature/*` y `fix/*`, y
 
 ## 🗺️ Roadmap
 
-- [x] Autenticación (login JWT) + RBAC base
+- [x] Autenticación (login JWT)
 - [x] Módulo de **Categorías** (CRUD completo)
-- [ ] Módulo de **Productos** (CRUD + relación con categorías)
-- [ ] Módulo de **Ventas** y detalle de venta
+- [x] Módulo de **Productos** (CRUD + relación con categorías + foto)
+- [x] Módulo de **Usuarios** (CRUD, alta por administrador)
+- [x] Módulo de **Ventas** y detalle de venta (flujo BO → GEN → PAG / AN)
+- [ ] **RBAC**: autorización por permiso con policies de ASP.NET Core
+- [ ] Módulo de **Reportes**
 - [ ] Consumo de la auditoría desde la API

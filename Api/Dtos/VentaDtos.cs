@@ -18,6 +18,15 @@ public record VentaResult(
     VentaDto? Data = null
 );
 
+// Resultado de pedir el comprobante de pago. Lleva el stream abierto del archivo:
+// el controller lo entrega con File(...) y ASP.NET se encarga de cerrarlo.
+public record ComprobanteResult(
+    VentaResultType Estado,
+    Stream? Contenido = null,
+    string? TipoContenido = null,
+    string? NombreDescarga = null
+);
+
 // ---- Lectura: listado de ventas (y su detalle para mostrar) ----
 
 public record VentaDto(
@@ -64,6 +73,7 @@ public record RegistrarDetalleVentaDto(
 
 public record EditarRequestVentaDto(
     Guid IdVenta,
+    Guid IdVendedor,
     List<EditarDetalleVentaDto> Detalles
 );
 

@@ -37,5 +37,27 @@ namespace Api.Controllers
             var data = await _comboService.GetRolesComboAsync();
             return Ok(ApiResponse<List<ComboDto>>.Success(data, "Roles para select listados correctamente"));
         }
+
+        // Productos activos (con precio) para el select de la venta
+        [HttpGet("productos")]
+        [ProducesResponseType(typeof(ApiResponse<List<ProductoComboDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<List<ProductoComboDto>>>> GetProductosCombo()
+        {
+            var data = await _comboService.GetProductosComboAsync();
+            return Ok(ApiResponse<List<ProductoComboDto>>.Success(data, "Productos para select listados correctamente"));
+        }
+
+        // Vendedores (usuarios con rol Vendedor) para el select de la venta
+        [HttpGet("vendedores")]
+        [ProducesResponseType(typeof(ApiResponse<List<ComboDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<List<ComboDto>>>> GetVendedoresCombo()
+        {
+            var data = await _comboService.GetVendedoresComboAsync();
+            return Ok(ApiResponse<List<ComboDto>>.Success(data, "Vendedores para select listados correctamente"));
+        }
     }
 }

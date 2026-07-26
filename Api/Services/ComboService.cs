@@ -1,5 +1,6 @@
 using Api.Data;
 using Api.Dtos;
+using Api.Models;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,26 @@ namespace Api.Services
                 .Where(r => r.Estado)
                 .OrderBy(r => r.Nombre)
                 .Select(r => new ComboDto(r.IdRol.ToString(), r.Nombre))
+                .ToListAsync();
+        }
+
+        public async Task<List<ProductoComboDto>> GetProductosComboAsync()
+        {
+            return await _context.Productos
+                .AsNoTracking()
+                .Where(r => r.Estado)
+                .OrderBy(r => r.Nombre)
+                .Select(r => new ProductoComboDto(r.IdProducto.ToString(), r.Nombre, r.Precio, r.Stock))
+                .ToListAsync();
+        }
+
+        public async Task<List<ComboDto>> GetVendedoresComboAsync()
+        {
+            return await _context.Usuarios
+                .AsNoTracking()
+                .Where(r => r.Estado && r.Rol.Nombre.Equals("Vendedor"))
+                .OrderBy(r => r.ApellidoPaterno).ThenBy(r => r.ApellidoMaterno).ThenBy(r => r.Nombres)
+                .Select(r => new ComboDto(r.IdUsuario.ToString(), r.ApellidoPaterno + " " + r.ApellidoMaterno + ", " + r.Nombres))
                 .ToListAsync();
         }
     }

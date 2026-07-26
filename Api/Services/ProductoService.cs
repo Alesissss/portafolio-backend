@@ -9,9 +9,15 @@ namespace Api.Services
     public class ProductoService : IProductoService
     {
         private readonly PortafolioDbContext _context;
-        public ProductoService(PortafolioDbContext context)
+        private readonly IFileService _fileService;
+
+        // La foto del producto es PÚBLICA: va a wwwroot y se sirve por URL directa, sin JWT.
+        private const string CarpetaFotos = "imagenes/productos";
+
+        public ProductoService(PortafolioDbContext context, IFileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         // Listar todos
@@ -35,7 +41,7 @@ namespace Api.Services
             return new ProductoResult(ProductoResultType.Ok, ProductoToDto(producto));
         }
         // Registrar
-        public async Task<ProductoResultType> RegistrarProductoAsync(RegistrarRequestProductoDto dto)
+        public async Task<ProductoResultType> RegistrarProductoAsync(RegistrarRequestProductoDto dto, IFormFile? foto)
         {
             bool existeNombre = await _context.Productos.AnyAsync(p => p.Nombre == dto.Nombre);
 
@@ -49,6 +55,11 @@ namespace Api.Services
                 Precio = dto.Precio,
                 Estado = dto.Estado,
                 IdCategoria = dto.IdCategoria,
+                // La foto es opcional: sin archivo, la columna queda NULL.
+                // Se guarda después de validar el nombre para no dejar archivos huérfanos.
+                ArchivoFoto = foto is { Length: > 0 }
+                    ? await _fileService.GuardarPublicoAsync(foto, CarpetaFotos)
+                    : null,
             };
 
             _context.Productos.Add(producto);
@@ -57,7 +68,7 @@ namespace Api.Services
             return ProductoResultType.Ok;
         }
         // Editar
-        public async Task<ProductoResultType> EditarProductoAsync(ProductoDto dto)
+        public async Task<ProductoResultType> EditarProductoAsync(ProductoDto dto, IFormFile? foto)
         {
             var producto = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == dto.IdProducto);
 
@@ -74,6 +85,15 @@ namespace Api.Services
             producto.Precio = dto.Precio;
             producto.Estado = dto.Estado;
             producto.IdCategoria = dto.IdCategoria;
+
+            // Sin archivo nuevo se conserva la foto actual (editar los datos no la borra).
+            // Con archivo nuevo se reemplaza y se elimina el anterior para no acumular basura.
+            if (foto is { Length: > 0 })
+            {
+                var fotoAnterior = producto.ArchivoFoto;
+                producto.ArchivoFoto = await _fileService.GuardarPublicoAsync(foto, CarpetaFotos);
+                _fileService.EliminarPublico(fotoAnterior);
+            }
 
             // Guardar cambios
             await _context.SaveChangesAsync();
@@ -123,6 +143,7 @@ namespace Api.Services
                 Stock: p.Stock,
                 Precio: p.Precio,
                 Estado: p.Estado,
+                ArchivoFoto: p.ArchivoFoto,
                 IdCategoria: p.IdCategoria,
                 NombreCategoria: p.Categoria.Nombre
             );

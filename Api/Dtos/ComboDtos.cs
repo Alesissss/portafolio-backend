@@ -7,3 +7,11 @@ public record ComboDto(
     string Value,
     string Label
 );
+
+// Dto con más datos
+public record ProductoComboDto(
+    string Value,
+    string Label,
+    decimal Precio,
+    decimal Stock
+);

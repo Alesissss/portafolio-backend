@@ -13,5 +13,7 @@ namespace Api.Services.Interfaces
         public Task<VentaResultType> GenerarVentaAsync(Guid id);
         public Task<VentaResultType> PagarVentaAsync(Guid id, IFormFile comprobante);
         public Task<VentaResultType> AnularVentaAsync(Guid id);
+        // El comprobante es PRIVADO: se sirve por endpoint autenticado, no por wwwroot.
+        public Task<ComprobanteResult> ObtenerComprobanteAsync(Guid id);
     }
 }

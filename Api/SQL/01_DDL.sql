@@ -12,7 +12,9 @@ DROP TABLE IF EXISTS permiso;
 DROP TABLE IF EXISTS auditoria_log;
 
 CREATE TABLE permiso (
-	id_permiso CHAR(15) PRIMARY KEY, --MOD_VENTAS, MOD_MAESTROS
+	-- VARCHAR y no CHAR: CHAR(n) en PostgreSQL es de ancho fijo y rellena con espacios,
+	-- así 'MOD_VENTAS' volvería como 'MOD_VENTAS     ' y ninguna comparación calzaría.
+	id_permiso VARCHAR(30) PRIMARY KEY, --MOD_VENTAS, MOD_MAESTROS
 	nombre VARCHAR(30) NOT NULL,
 	descripcion VARCHAR(255) NULL,
 	orden SMALLINT NOT NULL,
@@ -33,14 +35,14 @@ CREATE TABLE rol (
 );
 
 -- Índice parcial para el nombre del rol (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres de rol activos)
-CREATE UNIQUE INDEX idx_rol_nombre_unico_activo 
-ON rol (nombre) 
+CREATE UNIQUE INDEX idx_rol_nombre_unico_activo
+ON rol (nombre)
 WHERE (estado_registro = TRUE);
 
 CREATE TABLE permiso_rol(
-	id_permiso CHAR(15) NOT NULL,
+	id_permiso VARCHAR(30) NOT NULL,
 	id_rol UUID NOT NULL,
-	
+
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
     usuario_registro UUID            NULL,
@@ -53,7 +55,7 @@ CREATE TABLE permiso_rol(
 
 CREATE TABLE usuario (
 	id_usuario UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	id_rol UUID NOT NULL, 
+	id_rol UUID NOT NULL,
 	apellido_paterno VARCHAR(30) NOT NULL,
 	apellido_materno VARCHAR(30) NOT NULL,
 	nombres VARCHAR (30) NOT NULL,
@@ -71,24 +73,28 @@ CREATE TABLE usuario (
 );
 
 -- Índice parcial para el username (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los usernames activos)
-CREATE UNIQUE INDEX idx_usuario_username_unico_activo 
-ON usuario (username) 
+CREATE UNIQUE INDEX idx_usuario_username_unico_activo
+ON usuario (username)
 WHERE (estado_registro = TRUE);
 
 CREATE TABLE categoria (
-	id_categoria CHAR(3) PRIMARY KEY,
+	-- El código lo escribe el usuario ('LAP', 'COM'). VARCHAR(3) no rellena con espacios;
+	-- el CHECK de abajo es el que exige de verdad que midan SIEMPRE 3 caracteres.
+	id_categoria VARCHAR(3) PRIMARY KEY,
 	nombre VARCHAR(30) NOT NULL,
 	descripcion VARCHAR(255) NULL,
 	estado BOOLEAN DEFAULT TRUE, -- para dar de baja
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
     usuario_registro UUID            NULL,
-    fecha_registro   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    fecha_registro   TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	-- constraints
+	CONSTRAINT ck_categoria_codigo_largo CHECK (char_length(id_categoria) = 3)
 );
 
 -- Índice parcial para el nombre (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres activos)
-CREATE UNIQUE INDEX idx_categoria_nombre_unico_activo 
-ON categoria (nombre) 
+CREATE UNIQUE INDEX idx_categoria_nombre_unico_activo
+ON categoria (nombre)
 WHERE (estado_registro = TRUE);
 
 CREATE TABLE producto (
@@ -98,7 +104,7 @@ CREATE TABLE producto (
 	stock NUMERIC(19,2) NOT NULL,
 	precio NUMERIC(19,2) NOT NULL,
 	estado BOOLEAN DEFAULT TRUE, -- para dar de baja
-	id_categoria CHAR(3) NOT NULL,
+	id_categoria VARCHAR(3) NOT NULL,
 	archivo_foto VARCHAR(255) NULL,
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,
@@ -109,12 +115,14 @@ CREATE TABLE producto (
 );
 
 -- Índice parcial para el nombre (La cláusula UNIQUE no es suficiente para garantizar la unicidad de los nombres activos)
-CREATE UNIQUE INDEX idx_producto_nombre_unico_activo 
-ON producto (nombre) 
+CREATE UNIQUE INDEX idx_producto_nombre_unico_activo
+ON producto (nombre)
 WHERE (estado_registro = TRUE);
 
 CREATE TABLE estado_venta (
-	id_estado_venta CHAR(3) PRIMARY KEY,
+	-- Códigos de 2 y 3 letras conviviendo ('BO' y 'GEN'): con CHAR(3) el 'BO' volvía
+	-- como 'BO ' y los guards del VentaService (!= "BO") nunca calzaban.
+	id_estado_venta VARCHAR(3) PRIMARY KEY,
 	nombre VARCHAR(30) NOT NULL,
 	descripcion VARCHAR(50) NOT NULL
 );
@@ -125,8 +133,8 @@ CREATE TABLE venta (
 	subtotal NUMERIC(19,2) NOT NULL,
 	igv NUMERIC(19,2) NOT NULL,
 	total NUMERIC(19,2) NOT NULL,
-	id_vendedor UUID NOT NULL, 
-	id_estado_venta CHAR(3) NOT NULL, --BO (BORRADOR) --GEN (GENERADA) --PAG(PAGADA) --AN(ANULADA)
+	id_vendedor UUID NOT NULL,
+	id_estado_venta VARCHAR(3) NOT NULL, --BO (BORRADOR) --GEN (GENERADA) --PAG(PAGADA) --AN(ANULADA)
 	archivo_pago VARCHAR(255) NULL,
 	-- campos de auditoría
     estado_registro  BOOLEAN         NOT NULL DEFAULT TRUE,

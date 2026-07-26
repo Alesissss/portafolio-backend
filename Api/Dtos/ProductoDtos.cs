@@ -22,6 +22,9 @@ public record ProductoDto(
     decimal Stock,
     decimal Precio,
     bool Estado,
+    // Ruta relativa dentro de wwwroot ("imagenes/productos/abc.jpg"), o null si no tiene foto.
+    // El front la concatena con la URL base de la API para pintar el <img>.
+    string? ArchivoFoto,
     // Categoria
     string IdCategoria,
     string NombreCategoria
