@@ -2,7 +2,7 @@
 
 namespace Api.Models
 {
-    public class Permiso : RegistroBase
+    public class Permiso : RegistroConEstado
     {
         public string IdPermiso { get; set; } = null!;
         public string Nombre { get; set; } = null!;

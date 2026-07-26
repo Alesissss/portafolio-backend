@@ -2,7 +2,7 @@
 
 namespace Api.Models
 {
-    public class Categoria : RegistroBase
+    public class Categoria : RegistroConEstado
     {
         public string IdCategoria { get; set; } = null!;
         public string Nombre { get; set; } = null!;

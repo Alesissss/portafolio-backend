@@ -123,6 +123,11 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IComboService, ComboService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Obliga a .NET a convertir todas las URL en minúscula
 builder.Services.AddRouting(options =>
@@ -150,6 +155,12 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
+
+// Sirve el contenido de wwwroot por URL directa (ej. /imagenes/productos/abc.jpg).
+// Va ANTES de UseAuthentication a propósito: son archivos públicos y no deben pedir JWT.
+// Lo privado (comprobantes) NO vive aquí, sino en Almacenamiento/Privado, y se sirve
+// por un endpoint con [Authorize].
+app.UseStaticFiles();
 
 // Orden de los middlewares de CORS, autenticación y autorización
 app.UseCustomCors();

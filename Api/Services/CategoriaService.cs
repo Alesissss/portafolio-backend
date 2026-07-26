@@ -115,7 +115,7 @@ namespace Api.Services
             return CategoriaResultType.Ok;
         }
 
-        private CategoriaDto CategoriaToDto(Categoria cat) =>
+        private static CategoriaDto CategoriaToDto(Categoria cat) =>
             new CategoriaDto( 
                 IdCategoria: cat.IdCategoria,
                 Nombre: cat.Nombre,

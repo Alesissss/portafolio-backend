@@ -27,7 +27,7 @@ namespace Api.Data
             {
                 b.ToTable("permisos");
                 b.HasKey(p => p.IdPermiso);
-                b.Property(p => p.IdPermiso).HasMaxLength(15);
+                b.Property(p => p.IdPermiso).HasMaxLength(30);
                 b.Property(p => p.Nombre).IsRequired().HasMaxLength(30);
                 b.Property(p => p.Descripcion).HasMaxLength(255);
             });
@@ -44,6 +44,7 @@ namespace Api.Data
             {
                 b.ToTable("permiso_rol");
                 b.HasKey(pr => new { pr.IdPermiso, pr.IdRol });
+                b.Property(pr => pr.IdPermiso).HasMaxLength(30);
 
                 b.HasOne<Permiso>()
                  .WithMany()
@@ -85,9 +86,11 @@ namespace Api.Data
             {
                 b.ToTable("producto");
                 b.HasKey(p => p.IdProducto);
+                b.Property(p => p.Nombre).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Descripcion).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Stock).HasPrecision(19, 2);
                 b.Property(p => p.Precio).HasPrecision(19, 2);
+                b.Property(p => p.ArchivoFoto).HasMaxLength(255);
 
                 b.HasOne(p => p.Categoria)
                  .WithMany()
@@ -111,6 +114,7 @@ namespace Api.Data
                 b.Property(v => v.Subtotal).HasPrecision(19, 2);
                 b.Property(v => v.Igv).HasPrecision(19, 2);
                 b.Property(v => v.Total).HasPrecision(19, 2);
+                b.Property(p => p.ArchivoPago).HasMaxLength(255);
 
                 b.HasOne(v => v.EstadoVenta)
                  .WithMany()
@@ -119,11 +123,6 @@ namespace Api.Data
                 b.HasOne(v => v.Vendedor)
                  .WithMany()
                  .HasForeignKey(v => v.IdVendedor)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-                b.HasOne(v => v.Cliente)
-                 .WithMany()
-                 .HasForeignKey(v => v.IdCliente)
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -136,7 +135,7 @@ namespace Api.Data
                 b.Property(dv => dv.Observacion).HasMaxLength(255);
 
                 b.HasOne(dv => dv.Venta)
-                 .WithMany()
+                 .WithMany(v => v.Detalles)
                  .HasForeignKey(dv => dv.IdVenta);
 
                 b.HasOne(dv => dv.Producto)
@@ -158,14 +157,14 @@ namespace Api.Data
                 b.Property(al => al.RegistroNuevo).HasColumnType("jsonb");
             });
 
-            // Aplicar el query filter global para soft delete en todas las entidades que tengan la propiedad EstadoRegistro
+            // Aplicar el query filter global para soft delete solo a las entidades que implementan ISoftDelete
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                // Verificar si la entidad tiene herencia de RegistroBase
-                if (typeof(RegistroBase).IsAssignableFrom(entityType.ClrType))
+                // Verificar si la entidad participa del borrado lógico
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
                 {
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
-                    var property = Expression.Property(parameter, nameof(RegistroBase.EstadoRegistro));
+                    var property = Expression.Property(parameter, nameof(ISoftDelete.EstadoRegistro));
                     var condition = Expression.Equal(property, Expression.Constant(true));
                     var lambda = Expression.Lambda(condition, parameter);
 
