@@ -129,6 +129,29 @@ namespace Api.Controllers
             };
         }
 
+        // Descargar el comprobante de pago. Archivo PRIVADO: no está en wwwroot, así que
+        // este endpoint (con el [Authorize] del controller) es la única forma de obtenerlo.
+        [HttpGet("{id:guid}/comprobante")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DescargarComprobante(Guid id)
+        {
+            var result = await _ventaService.ObtenerComprobanteAsync(id);
+
+            return result.Estado switch
+            {
+                // No lleva ApiResponse: la respuesta ES el archivo, no un JSON.
+                VentaResultType.Ok =>
+                    File(result.Contenido!, result.TipoContenido!, result.NombreDescarga),
+                VentaResultType.ArchivoRequerido =>
+                    NotFound(ApiResponse<object>.Fail("Esta venta no tiene comprobante de pago.")),
+                VentaResultType.NoEncontrada =>
+                    NotFound(ApiResponse<object>.Fail("La venta que intenta consultar no existe.")),
+                _ => StatusCode(500, ApiResponse<object>.Fail("Ocurrió un error inesperado al obtener el comprobante. Por favor, contacte al administrador."))
+            };
+        }
+
         // Pagar: Generada -> Pagada (requiere el comprobante; estado irreversible)
         [HttpPatch("{id:guid}/pagar")]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
