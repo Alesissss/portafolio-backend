@@ -5,7 +5,7 @@ namespace Api.Services.Interfaces
 {
     public interface IVentaService
     {
-        public Task<List<VentaDto>> GetVentasAsync();
+        public Task<PaginacionResponseDto<VentaDto>> GetVentasAsync(int pagina, int registrosPorPagina, string? search);
         public Task<VentaResult> ObtenerUnaVentaAsync(Guid id);
         public Task<VentaResultType> RegistrarVentaAsync(RegistrarRequestVentaDto dto);
         public Task<VentaResultType> EditarVentaAsync(EditarRequestVentaDto dto);

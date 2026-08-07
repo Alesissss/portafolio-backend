@@ -145,6 +145,11 @@ CREATE TABLE venta (
 	CONSTRAINT fk_estado_venta FOREIGN KEY (id_estado_venta) REFERENCES estado_venta(id_estado_venta)
 );
 
+-- Índice para mejorar las consultas de ventas para el listado
+CREATE INDEX idx_venta_estado_fecha 
+ON public.venta (fecha_emision DESC) 
+WHERE estado_registro = true;
+
 CREATE TABLE detalle_venta (
 	id_venta UUID NOT NULL,
 	id_producto INT NOT NULL,

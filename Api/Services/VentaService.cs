@@ -19,18 +19,54 @@ namespace Api.Services
         }
 
         // Listar todas las ventas con su vendedor, su estado y sus detalles (+ nombre de producto).
-        public async Task<List<VentaDto>> GetVentasAsync()
+        public async Task<PaginacionResponseDto<VentaDto>> GetVentasAsync(int pagina, int registrosPorPagina, string? search)
         {
-            var ventas = await _context.Ventas
+            if (pagina < 1) pagina = 1;
+            if (registrosPorPagina < 1) registrosPorPagina = 10;
+
+            // Creamos la consulta
+            var query = _context.Ventas
                 .Include(v => v.Vendedor)
                 .Include(v => v.EstadoVenta)
                 .Include(v => v.Detalles)
                     .ThenInclude(d => d.Producto)
                 .AsNoTracking()
+                .AsQueryable();
+
+            // Buscar por el campo enviado  
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower().Trim();
+                query = query.Where(v =>
+                    v.IdVenta.ToString().Contains(searchLower) ||
+                    v.Vendedor.Nombres.ToLower().Contains(searchLower) ||
+                    v.Vendedor.ApellidoPaterno.ToLower().Contains(searchLower) ||
+                    v.Vendedor.ApellidoMaterno.ToLower().Contains(searchLower) ||
+                    v.EstadoVenta.Descripcion.ToLower().Contains(searchLower) ||
+                    v.Total.ToString().Contains(searchLower)
+                );
+            }
+
+            var totalRegistros = await query.CountAsync();
+
+            var totalPaginas = (int)Math.Ceiling((double)totalRegistros / registrosPorPagina);
+
+            var ventas = await query
                 .OrderByDescending(v => v.FechaEmision)
+                .Skip((pagina - 1) * registrosPorPagina)
+                .Take(registrosPorPagina)
                 .ToListAsync();
 
-            return ventas.Select(VentaToDto).ToList();
+            var elementosDto = ventas.Select(VentaToDto).ToList();
+
+            return new PaginacionResponseDto<VentaDto>
+            (
+                TotalRegistros: totalRegistros,
+                PaginaActual: pagina,
+                RegistrosPorPagina: registrosPorPagina,
+                TotalPaginas: totalPaginas,
+                Elementos: elementosDto
+            );
         }
 
         // Ver datos de una venta y sus detalles

@@ -29,3 +29,5 @@ INSERT INTO estado_venta (id_estado_venta, nombre, descripcion) VALUES
 ('GEN', 'GENERADA', 'Solo puede ser anulada.'),
 ('PAG', 'PAGADA', 'Estado irreversible.'),
 ('AN', 'ANULADA', 'Estado irreversible');
+
+-- Permisos de venta (configuración)

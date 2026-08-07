@@ -25,4 +25,8 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Almacenamiento\Privado\comprobantes\" />
+  </ItemGroup>
+
 </Project>

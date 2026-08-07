@@ -14,14 +14,18 @@ namespace Api.Controllers
     {
         // Listar todas
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<List<VentaDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PaginacionResponseDto<VentaDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<List<VentaDto>>>> ListarVentas()
+        public async Task<ActionResult<ApiResponse<PaginacionResponseDto<VentaDto>>>> ListarVentas(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int registrosPorPagina = 10,
+            [FromQuery] string? search = null
+            )
         {
-            var ventas = await _ventaService.GetVentasAsync();
-            return Ok(ApiResponse<List<VentaDto>>.Success(ventas, "Ventas listadas correctamente"));
+            var ventas = await _ventaService.GetVentasAsync(pagina, registrosPorPagina, search);
+            return Ok(ApiResponse<PaginacionResponseDto<VentaDto>>.Success(ventas, "Ventas listadas correctamente"));
         }
 
         // Listar una
